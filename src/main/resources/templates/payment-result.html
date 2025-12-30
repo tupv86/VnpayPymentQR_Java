@@ -1,0 +1,20 @@
+<div th:fragment="fragment">
+    <h2>Kết quả thanh toán</h2>
+
+    <p>Số tiền: <span th:text="${model.vnp_Amount}"></span></p>
+    <p>Mã ngân hàng: <span th:text="${model.vnp_BankCode}"></span></p>
+    <p>Mã giao dịch VNPAY: <span th:text="${model.vnp_TransactionNo}"></span></p>
+
+    <p>
+        Mã phản hồi:
+        <span th:text="${model.vnp_ResponseCode}"></span>
+        (
+        <span th:text="${model.vnp_ResponseCode == '00' ? 'Thành công' : 'Thất bại'}"></span>
+        )
+    </p>
+
+    <!-- Bạn muốn show thêm field nào thì thêm dòng tương tự -->
+    <p>Mã đơn (TxnRef): <span th:text="${model.vnp_TxnRef}"></span></p>
+    <p>Trạng thái giao dịch: <span th:text="${model.vnp_TransactionStatus}"></span></p>
+    <p>PayDate: <span th:text="${model.vnp_PayDate}"></span></p>
+</div>

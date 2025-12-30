@@ -1,0 +1,15 @@
+vnpay:
+  tmnCode: Q2WFD4FI
+  hashSecret: DGX9L3899RQXPX44CQQUV01Y2MQ2D645
+  payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  queryUrl: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
+  returnUrl: http://localhost:8080/payment/return
+logging:
+  level:
+    org.thymeleaf: DEBUG
+    org.springframework.web: DEBUG
+spring:
+  web:
+    error:
+      include-binding-errors: always
+      include-message: always

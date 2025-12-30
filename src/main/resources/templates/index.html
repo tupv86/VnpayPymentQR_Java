@@ -1,0 +1,153 @@
+<div th:fragment="fragment">
+
+    <h3 class="mb-3">Danh sách giao dịch</h3>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Mã VNPAY</th>
+                <th>Số tiền</th>
+                <th>Thông tin</th>
+                <th>Ngày tạo</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="o : ${orders}">
+                <td th:text="${o.orderId}">20251224123456</td>
+                <td th:text="${o.transactionNo}">15367801</td>
+                <td th:text="${#numbers.formatInteger(o.amount, 0, 'COMMA')} + ' VND'">30,000 VND</td>
+                <td th:text="${o.orderInfo}">Test thanh toan</td>
+                <td th:text="${o.createDate}">20251224123456</td>
+
+                <td>
+          <span class="badge"
+                th:text="${o.status}"
+                th:classappend="${o.status == 'Success'} ? ' bg-success' :
+                                (${o.status == 'Failed'} ? ' bg-danger' : ' bg-warning')">
+            Pending
+          </span>
+                </td>
+
+                <td class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-info btn-sm"
+                            th:attr="onclick=|queryDR('${o.orderId}')|">
+                        QueryDR
+                    </button>
+
+                    <button class="btn btn-warning btn-sm"
+                            th:if="${o.status == 'Success'}"
+                            th:attr="onclick=|showRefundModal('${o.orderId}', ${o.amount})|">
+                        Refund
+                    </button>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(orders)}">
+                <td colspan="6" class="text-center text-muted py-4">
+                    Chưa có giao dịch nào.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Refund -->
+    <div class="modal fade" id="refundModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hoàn tiền giao dịch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p><strong>Mã đơn:</strong> <span id="modalOrderId"></span></p>
+                    <p><strong>Số tiền gốc:</strong> <span id="modalOriginalAmount"></span> VND</p>
+
+                    <div class="mb-3">
+                        <label class="form-label">Số tiền hoàn (VND)</label>
+                        <input type="number" id="modalRefundAmount" class="form-control" min="1000" step="1000" />
+                        <small class="text-muted">Nhập số tiền muốn hoàn (tối đa bằng số tiền gốc)</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-warning" onclick="confirmRefund()">Xác nhận hoàn tiền</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Scripts riêng cho trang Index -->
+<th:block th:fragment="scripts">
+    <script>
+        function queryDR(orderId) {
+            fetch('/admin/querydr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: orderId })
+            })
+                .then(r => r.json())
+                .then(data => alert(JSON.stringify(data, null, 2)))
+                .catch(() => alert("Lỗi kết nối QueryDR"));
+        }
+
+        let currentOrderId = '';
+        let maxAmount = 0;
+
+        function showRefundModal(orderId, originalAmount) {
+            currentOrderId = orderId;
+            maxAmount = originalAmount;
+
+            document.getElementById('modalOrderId').textContent = orderId;
+            document.getElementById('modalOriginalAmount').textContent = Number(originalAmount).toLocaleString();
+            const input = document.getElementById('modalRefundAmount');
+            input.value = originalAmount;
+            input.max = originalAmount;
+
+            new bootstrap.Modal(document.getElementById('refundModal')).show();
+        }
+
+        function confirmRefund() {
+            const refundAmount = Number(document.getElementById('modalRefundAmount').value);
+
+            if (!refundAmount || refundAmount <= 0) {
+                alert("Vui lòng nhập số tiền hợp lệ");
+                return;
+            }
+            if (refundAmount > maxAmount) {
+                alert("Số tiền hoàn không được lớn hơn số tiền gốc");
+                return;
+            }
+            if (!confirm(`Xác nhận hoàn ${refundAmount.toLocaleString()} VND cho đơn hàng ${currentOrderId}?`)) {
+                return;
+            }
+
+            fetch('/admin/refund', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: currentOrderId,
+                    refundAmount: refundAmount
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message || (data.success ? "Hoàn tiền thành công!" : "Lỗi hoàn tiền"));
+                    if (data.success) location.reload();
+                })
+                .catch(() => alert("Lỗi kết nối hoàn tiền"));
+
+            const m = bootstrap.Modal.getInstance(document.getElementById('refundModal'));
+            if (m) m.hide();
+        }
+    </script>
+</th:block>
