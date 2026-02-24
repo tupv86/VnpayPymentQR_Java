@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.SortedMap;
@@ -43,16 +45,20 @@ public class PaymentController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "amount must be a positive integer");
         }
+        ZoneId zoneVN = ZoneId.of("Asia/Ho_Chi_Minh");
+        DateTimeFormatter VNP_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        ZonedDateTime now = ZonedDateTime.now(zoneVN);
 
-        String orderId = LocalDateTime.now().format(VNP_FMT);
-        String expireDate = LocalDateTime.now().plusMinutes(15).format(VNP_FMT);
+        String createDate = now.format(VNP_FMT);
+        String expireDate = now.plusMinutes(15).format(VNP_FMT);
+        String orderId = now.format(DateTimeFormatter.ofPattern("HHmmss"));
 
         // Save order
         Order order = new Order();
         order.setOrderId(orderId);
         order.setAmount(amountLong);
         order.setOrderInfo("Test thanh toan tien Thuoc");
-        order.setCreateDate(LocalDateTime.now().format(VNP_FMT));
+        order.setCreateDate(createDate);
         order.setExpireDate(expireDate);
         order.setPromoCode(vnpPromoCode);
         order.setStatus("Pending");
