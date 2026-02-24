@@ -2,8 +2,11 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 COPY . .
-RUN chmod +x gradlew || true
-RUN ./gradlew clean bootJar -x test
+
+# Fix CRLF + permission for gradlew
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+
+RUN ./gradlew --no-daemon --stacktrace --info clean bootJar -x test
 
 # ===== Run stage =====
 FROM eclipse-temurin:21-jre

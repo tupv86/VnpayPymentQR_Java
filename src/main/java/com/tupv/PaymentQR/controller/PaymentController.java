@@ -77,8 +77,6 @@ public class PaymentController {
         vnpParams.put("vnp_ExpireDate", expireDate);
 
         if (vnpPromoCode != null && !vnpPromoCode.isBlank()) {
-            // NOTE: C# của bạn đang làm: vnp_PromoCode + amount (rất dễ sai).
-            // Mình giữ đúng y hệt để bạn so sánh, nhưng bạn nên sửa theo spec của VNPAY.
             vnpParams.put("vnp_PromoCode", vnpPromoCode + amount);
         }
 

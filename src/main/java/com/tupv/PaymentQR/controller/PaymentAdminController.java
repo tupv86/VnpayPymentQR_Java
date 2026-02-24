@@ -87,7 +87,7 @@ public class PaymentAdminController {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
+            headers.set("User-Agent", "VNPAY-Java-Client");
             HttpEntity<String> entity =
                     new HttpEntity<>(mapper.writeValueAsString(payload), headers);
 
@@ -199,6 +199,7 @@ public class PaymentAdminController {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("User-Agent", "VNPAY-Java-Client");
             HttpEntity<String> entity =
                     new HttpEntity<>(mapper.writeValueAsString(payload), headers);
 
